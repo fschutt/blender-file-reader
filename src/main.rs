@@ -1,13 +1,14 @@
 #[macro_use]
 extern crate blender_derive;
+extern crate byteorder;
+use byteorder::{BigEndian, ReadBytesExt, LittleEndian, WriteBytesExt};
 
 #[repr(C, packed)]
 #[derive(Debug, BlenderRead, BlenderWrite)]
 struct Configuration {
-   header: [char; 7],
-   pointer_size: char,
-   endianness: char,
-   version: [char; 3],
+    version: [u8; 3],
+    pointer_size: u8,
+    endianness: u8,
 }
 
 trait BlenderRead {
