@@ -6,10 +6,12 @@ use byteorder::{BigEndian, ReadBytesExt, LittleEndian, WriteBytesExt};
 #[repr(C, packed)]
 #[derive(Debug, BlenderRead, BlenderWrite)]
 struct Configuration {
-    version: [u8; 3],
+    version: [i32; 3],
     pointer_size: u8,
     endianness: u8,
 }
+
+// impl BlenderRead for Configuration { fn read_big_endian<R: ::std::io::Read>(mut buffer: R) -> Self { Configuration { version : [ buffer.read_i32::<BigEndian>().unwrap() ,  buffer.read_i32::<BigEndian>().unwrap() ,  buffer.read_i32::<BigEndian>().unwrap() ]; pointer_size : buffer.read_u8().unwrap(); endianness : buffer.read_u8().unwrap(); } } fn read_little_endian<R: ::std::io::Read>(mut buffer: R) -> Self { Configuration { version : [ buffer.read_i32::<LittleEndian>().unwrap() ,  buffer.read_i32::<LittleEndian>().unwrap() ,  buffer.read_i32::<LittleEndian>().unwrap() ]; pointer_size : buffer.read_u8().unwrap(); endianness : buffer.read_u8().unwrap(); } } }
 
 trait BlenderRead {
     fn read_big_endian<R: ::std::io::Read>(data: R) -> Self;
