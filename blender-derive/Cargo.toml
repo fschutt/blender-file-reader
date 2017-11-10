@@ -1,7 +1,11 @@
 [package]
-name = "blender"
+name = "blender-derive"
 version = "0.1.0"
 authors = ["Felix Schütt <felix.schuett@maps4print.com>"]
 
+[lib]
+proc-macro = true
+
 [dependencies]
-blender-derive = { path = "blender-derive" }
+syn = "0.11.11"
+quote = "0.3.15"
