@@ -6,3 +6,4 @@ authors = ["Felix Schütt <felix.schuett@maps4print.com>"]
 [dependencies]
 blender-derive = { path = "blender-derive" }
 byteorder = "1.1.0"
+error-chain = "0.11.0"
