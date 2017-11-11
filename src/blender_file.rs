@@ -14,6 +14,11 @@ pub const BLENDER_MAGIC_HEADER: [u8; 7] =
      'E' as u8,
      'R' as u8];
 
+/// Ending block, marks end of file
+pub const MAGIC_ENDB: [u8; 4] = ['E' as u8, 'N' as u8, 'D' as u8, 'B' as u8];
+/// SDNA block ID, describes the file structure
+pub const MAGIC_SDNA: [u8; 4] = ['D' as u8, 'N' as u8, 'A' as u8, '1' as u8];
+
 /// File holding the data for the individual components
 #[derive(Debug, Clone)]
 pub struct BlenderFile {
@@ -43,14 +48,21 @@ impl BlenderFile {
 
     /// Splits the file into file blocks.
     /// NOTE: The read head should be at the end of the header
-    fn split_into_file_blocks<R: ::std::io::Read>(source: &mut R, header: &BlenderHeader) -> Result<Vec<BlenderFileBlock>, BlenderError> {
+    fn split_into_file_blocks<R: ::std::io::Read>(_source: &mut R, _header: &BlenderHeader) -> Result<Vec<BlenderFileBlock>, BlenderError> {
         // TODO! 
         Ok(Vec::new())
     }
     
     /// Save the file
     pub fn save<W: ::std::io::Write>(&self, target: &mut W) -> Result<(), BlenderError> {
-        // TODO!
+        self.header.write(target)?;
+        for file_block in self.file_blocks.iter() {
+            file_block.write(target, &self.header)?;
+        }
+
+        self.sdna.write(target, &self.header)?;
+        target.write(&MAGIC_ENDB)?;
+        // TODO: write ENDB file block properly
         Ok(())
     } 
 }

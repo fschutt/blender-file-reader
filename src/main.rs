@@ -10,10 +10,11 @@ pub mod blender_file;
 pub mod blender_file_block;
 pub mod blender_header;
 pub mod blender_sdna;
+pub mod types;
 
 use blender_file::BlenderFile;
 
-fn main() {    
+fn main() {
     let mut test_file = ::std::fs::File::open("assets/default_cube.blend").unwrap();
     let blender_file = BlenderFile::new(&mut test_file).unwrap();
     println!("File: {:#?}", blender_file);

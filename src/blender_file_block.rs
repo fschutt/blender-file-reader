@@ -1,13 +1,6 @@
-
-use traits::{BlenderRead, BlenderWrite};
 use errors::Error as BlenderError;
-use blender_header::BlenderHeader;
-use byteorder::{BigEndian, LittleEndian, ReadBytesExt, WriteBytesExt};
-
-/// Ending block, marks end of file
-const MAGIC_ENDB: [u8; 4] = ['E' as u8, 'N' as u8, 'D' as u8, 'B' as u8];
-/// SDNA block ID, describes the file structure
-const MAGIC_SDNA: [u8; 4] = ['D' as u8, 'N' as u8, 'A' as u8, '1' as u8]; 
+use blender_header::{PointerSize, Endianness, BlenderHeader};
+use byteorder::{BigEndian, LittleEndian, WriteBytesExt};
 
 #[derive(Debug, Clone)]
 pub struct BlenderFileBlock {
@@ -26,14 +19,14 @@ pub struct BlenderFileBlock {
     /// The type of this structure.
     /// There is an id for lights, materials, scenes, etc.
     pub type_id: u32,
-    /// The data for this file block. This can be anything.
+    /// The data for this file block. This can be anything
     pub data: Vec<u8>,
 }
 
 impl BlenderFileBlock {
     
     /// Loads the data for a file block
-    fn load_from_source<R: ::std::io::Read>(source: &mut R, header: &BlenderHeader) -> Result<Self, BlenderError> {
+    pub fn load_from_source<R: ::std::io::Read>(_source: &mut R, _header: &BlenderHeader) -> Result<Self, BlenderError> {
         // TODO!!
         Ok(Self {
             code: [0; 4],
@@ -43,5 +36,33 @@ impl BlenderFileBlock {
             type_id: 0,
             data: Vec::new(),
         })
+    }
+
+    /// Saves the data in the file block
+    pub fn write<W: ::std::io::Write>(&self, target: &mut W, header: &BlenderHeader) -> Result<(), BlenderError> {
+        target.write(&self.code)?;
+        match header.endianness {
+            Endianness::Big =>   {
+                target.write_u32::<BigEndian>(self.size)?;
+                match header.pointer_size {
+                    PointerSize::Big =>   { target.write_u64::<BigEndian>(self.old_pointer)?; },
+                    PointerSize::Small => { target.write_u32::<BigEndian>(self.old_pointer as u32)?; },
+                }
+                target.write_u32::<BigEndian>(self.sdna_index)?;
+                target.write_u32::<BigEndian>(self.type_id)?;
+            },
+            Endianness::Little => {
+                target.write_u32::<LittleEndian>(self.size)?;
+                match header.pointer_size {
+                    PointerSize::Big =>   { target.write_u64::<LittleEndian>(self.old_pointer)?; },
+                    PointerSize::Small => { target.write_u32::<LittleEndian>(self.old_pointer as u32)?; },
+                }
+                target.write_u32::<LittleEndian>(self.sdna_index)?;
+                target.write_u32::<LittleEndian>(self.type_id)?;
+            },
+        }
+
+        target.write(&self.data)?;
+        Ok(())
     }
 }
